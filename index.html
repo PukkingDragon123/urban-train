@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hollow Dome</title>
+<link rel="icon" href="data:,">
+<style>
+  html, body { margin:0; padding:0; background:#050407; height:100%; overflow:hidden; }
+  body { display:flex; align-items:center; justify-content:center; font-family: monospace; color:#cbbfae; }
+  #game { image-rendering: pixelated; image-rendering: crisp-edges; background:#000; outline:none; }
+  #boot { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#050407; cursor:pointer; user-select:none; }
+  #boot h1 { font-weight:normal; letter-spacing:0.5em; font-size:28px; color:#d8c9a6; margin:0 0 12px 0; }
+  #boot p { color:#7d7268; font-size:13px; max-width:520px; text-align:center; line-height:1.6; margin:4px 0; }
+  #boot .warn { color:#8a5a5a; margin-top:18px; font-size:12px; }
+  #boot .go { margin-top:26px; color:#cbbfae; border:1px solid #4a4139; padding:8px 22px; font-size:13px; letter-spacing:0.2em; }
+  #boot .go:hover { background:#1a1519; }
+</style>
+</head>
+<body>
+<canvas id="game" tabindex="0"></canvas>
+<div id="boot">
+  <h1>HOLLOW DOME</h1>
+  <p>A quiet game about six parrots, a very large empty house, and the man who still has to feed them.</p>
+  <p>Keyboard required. Headphones recommended. Everything you see is drawn, not photographed.</p>
+  <p class="warn">Contains psychological horror themes, depictions of depression and suicidal ideation (non-instructional), blood and surreal imagery. If you are struggling, please reach out to someone. You are not the only one keeping something alive.</p>
+  <div class="go">CLICK TO BEGIN</div>
+</div>
+<script src="js/util.js"></script>
+<script src="js/font.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/input.js"></script>
+<script src="js/gfx.js"></script>
+<script src="js/props.js"></script>
+<script src="js/parrots.js"></script>
+<script src="js/world.js"></script>
+<script src="js/player.js"></script>
+<script src="js/sanity.js"></script>
+<script src="js/phone.js"></script>
+<script src="js/story.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/render.js"></script>
+<script src="js/endings.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
