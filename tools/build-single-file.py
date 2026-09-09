@@ -6,7 +6,7 @@ standalone page chrome (masthead, controls, content note). No build deps.
 """
 import os
 
-MODULES = ['util', 'font', 'audio', 'input', 'gfx', 'props', 'parrots', 'world',
+MODULES = ['util', 'font', 'audio', 'input', 'touch', 'gfx', 'props', 'parrots', 'world',
            'player', 'sanity', 'phone', 'story', 'ui', 'render', 'endings', 'main']
 
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

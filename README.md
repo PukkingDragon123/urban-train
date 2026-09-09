@@ -19,15 +19,20 @@ Keyboard required. Headphones recommended.
 
 ### Single-file build
 
-`dist/hollow-dome.html` is the whole game inlined into one page with standalone
-chrome around it, suitable for hosting anywhere or opening straight off disk.
-Rebuild it after changing anything in `js/`:
+`dist/hollow-dome.html` is the whole game inlined into one full-bleed page,
+suitable for hosting anywhere or opening straight off disk. Rebuild it after
+changing anything in `js/`:
 
 ```
 python3 tools/build-single-file.py
 ```
 
 ## Controls
+
+On a touchscreen the controls are drawn into the game itself: a movement cross
+bottom left, hop / use / interact bottom right, and phone, menu and slow-breathing
+buttons down the right edge. Items in the bar, birds, bowls, doors, menu rows and
+message replies are all tappable directly. Mouse clicks work on menus too.
 
 | Action | Keys |
 | --- | --- |
@@ -56,6 +61,9 @@ python3 tools/build-single-file.py
 - **Sanity / perception**: exposure accumulators per hazard, grounding actions with diminishing returns, tiered hallucinations (props transform, dead plants bloom, clocks lie, a figure in the doorway, lights out, wrong reflections, blood, ghost text messages, time skips, rooms that stretch, an aviary where there should not be one), audio filtering, whispers and heartbeat, UI jitter and glitching that never becomes unusable.
 - **Phone**: seven contacts with day-gated, condition-gated, branching conversations. Replying steadies Adrian and changes later events. Ignoring people makes the isolation worse. Some contacts should not be able to reply.
 - **Story**: fractured across newspaper clippings, security footage, corrupted business records, damaged photographs, old tapes, dreams and phrases the parrots learn from things nobody remembers saying.
+- **Input**: keyboard, mouse and touch share one path. On-screen buttons drive a
+  virtual key state, and everything drawn registers its own tap area, so hit
+  targets can never drift from the pixels.
 - **Endings**: Connection, The Aviary, Collapse. Decided by how the birds were treated, how many people you reached out to, what you were willing to look at, and how far things fell.
 
 Progress saves to `localStorage` when you sleep.

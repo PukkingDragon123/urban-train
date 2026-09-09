@@ -1,259 +1,39 @@
 <title>Hollow Dome</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-  :root {
-    --void: #050407;
-    --panel: #0d0e17;
-    --panel-2: #121420;
-    --edge: #242835;
-    --edge-lit: #3a4150;
-    --bone: #d8c9a6;
-    --dim: #8b8072;
-    --faint: #5c554c;
-    --glass: #a5d8e6;
-    --blood: #8a1220;
-    --step-0: 0.8125rem;
-    --step-1: 1rem;
-    --step-2: 1.375rem;
-    --step-3: 2.25rem;
-    --step-4: 3.25rem;
-    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
-    --serif: "Newsreader", Georgia, "Times New Roman", serif;
-  }
-  * { box-sizing: border-box; }
-  body {
-    background: var(--void);
-    color: var(--bone);
-    font-family: var(--serif);
-    font-size: var(--step-1);
-    line-height: 1.65;
-    -webkit-font-smoothing: antialiased;
-  }
-  /* faint dome-glow behind everything, painted not layered on a host ground */
-  .ground {
-    min-height: 100%;
-    background:
-      radial-gradient(120% 60% at 50% 74%, rgba(165, 216, 230, 0.055), rgba(5, 4, 7, 0) 62%),
-      radial-gradient(80% 45% at 50% 0%, rgba(138, 18, 32, 0.05), rgba(5, 4, 7, 0) 70%),
-      var(--void);
-    padding: clamp(20px, 4vw, 52px) clamp(16px, 4vw, 40px) 64px;
-  }
-  .shell { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: clamp(22px, 3.2vw, 40px); }
-
-  /* ---- masthead ---- */
-  .masthead { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; }
-  .wordmark {
-    font-family: var(--serif);
-    font-weight: 300;
-    font-size: clamp(2.25rem, 7vw, var(--step-4));
-    line-height: 0.95;
-    letter-spacing: 0.02em;
+  :root { color-scheme: dark; }
+  html, body {
+    height: 100%;
     margin: 0;
-    text-wrap: balance;
-  }
-  .wordmark em { font-style: italic; color: var(--glass); }
-  .standfirst {
-    font-family: var(--mono);
-    font-size: var(--step-0);
-    color: var(--dim);
-    letter-spacing: 0.04em;
-    text-align: right;
-    line-height: 1.7;
-    margin: 0;
-  }
-  .standfirst b { color: var(--bone); font-weight: 500; }
-
-  /* ---- the screen ---- */
-  .screen {
-    position: relative;
-    border: 1px solid var(--edge);
+    padding: 0;
     background: #000;
-    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6), 0 30px 90px -30px rgba(165, 216, 230, 0.14);
-    display: flex;
-    justify-content: center;
-    align-items: center;
     overflow: hidden;
-    min-height: 240px;
+    overscroll-behavior: none;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .stage {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+      radial-gradient(120% 80% at 50% 60%, rgba(165, 216, 230, 0.05), rgba(0, 0, 0, 0) 65%),
+      #000;
   }
   #game {
     display: block;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
-    max-width: 100%;
-    height: auto;
+    touch-action: none;
     outline: none;
-  }
-  #game:focus-visible { outline: 1px solid var(--glass); outline-offset: -1px; }
-
-  /* ---- the curtain sits over the lower screen so the title art stays visible ---- */
-  .curtain {
-    position: absolute;
-    inset: auto 0 0 0;
-    padding: clamp(28px, 6vh, 64px) clamp(18px, 4vw, 40px) clamp(18px, 3vw, 30px);
-    background: linear-gradient(to bottom, rgba(5, 4, 7, 0) 0%, rgba(5, 4, 7, 0.88) 34%, rgba(5, 4, 7, 0.97) 100%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 14px;
-    text-align: center;
-  }
-  .curtain[hidden] { display: none !important; }
-  .warn {
-    font-family: var(--mono);
-    font-size: 0.75rem;
-    line-height: 1.75;
-    letter-spacing: 0.02em;
-    color: var(--dim);
-    max-width: 60ch;
-    margin: 0;
-    border-left: 2px solid var(--blood);
-    padding-left: 12px;
-    text-align: left;
-  }
-  .warn b { color: #c9a0a4; font-weight: 400; }
-  .begin {
-    font-family: var(--mono);
-    font-size: 0.8125rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--void);
-    background: var(--glass);
-    border: 1px solid var(--glass);
-    padding: 11px 26px;
-    cursor: pointer;
-    transition: background 140ms ease, color 140ms ease;
-  }
-  .begin:hover, .begin:focus-visible { background: var(--bone); border-color: var(--bone); outline: none; }
-  .curtain .hint { font-family: var(--mono); font-size: 0.6875rem; color: var(--faint); letter-spacing: 0.06em; margin: 0; }
-
-  /* ---- briefing ---- */
-  .briefing { display: grid; grid-template-columns: repeat(auto-fit, minmax(232px, 1fr)); gap: clamp(20px, 3vw, 38px); align-items: start; }
-  .col { display: flex; flex-direction: column; gap: 10px; }
-  .eyebrow {
-    font-family: var(--mono);
-    font-size: 0.6875rem;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--faint);
-    margin: 0;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--edge);
-  }
-  .col p { margin: 0; font-size: 0.9375rem; color: #bdb2a0; max-width: 46ch; }
-  .col p + p { margin-top: 2px; }
-  .col em { color: var(--bone); font-style: italic; }
-
-  .keys { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 5px 14px; align-items: baseline; }
-  .keys dt { font-family: var(--mono); font-size: 0.75rem; color: var(--glass); white-space: nowrap; font-variant-numeric: tabular-nums; }
-  .keys dd { margin: 0; font-size: 0.875rem; color: #bdb2a0; }
-
-  .day { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 9px; counter-reset: beat; }
-  .day li { display: flex; gap: 11px; font-size: 0.9375rem; color: #bdb2a0; }
-  .day li > span { flex: 1; }
-  .day li::before {
-    counter-increment: beat;
-    content: counter(beat);
-    font-family: var(--mono);
-    font-size: 0.6875rem;
-    color: var(--faint);
-    padding-top: 0.35em;
-    font-variant-numeric: tabular-nums;
-  }
-  .day b { color: var(--bone); font-weight: 500; }
-
-  .colophon {
-    font-family: var(--mono);
-    font-size: 0.6875rem;
-    letter-spacing: 0.05em;
-    color: var(--faint);
-    line-height: 1.9;
-    margin: 0;
-    padding-top: 18px;
-    border-top: 1px solid var(--edge);
-  }
-  @media (max-width: 660px) {
-    #game { width: 100%; }
-    .standfirst { text-align: left; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .begin { transition: none; }
   }
 </style>
 
-<div class="ground">
-  <div class="shell">
-
-    <header class="masthead">
-      <h1 class="wordmark">Hollow<br><em>Dome</em></h1>
-      <p class="standfirst">
-        Six parrots. One man. A house on a hill.<br>
-        <b>7 days</b> &middot; <b>3 endings</b> &middot; keyboard required
-      </p>
-    </header>
-
-    <div class="screen">
-      <canvas id="game" tabindex="0" aria-label="Hollow Dome game screen"></canvas>
-      <div class="curtain" id="curtain">
-        <p class="warn">
-          <b>Content note.</b> Psychological horror, depression and suicidal ideation
-          (non-instructional, off-screen), blood and surreal imagery. If any of it is close
-          to home, please talk to someone.
-        </p>
-        <button class="begin" id="begin" type="button">Turn on sound and play</button>
-        <p class="hint">Click the screen first if the keys don&rsquo;t answer. Press H at any time for help.</p>
-      </div>
-    </div>
-
-    <section class="briefing">
-      <div class="col">
-        <p class="eyebrow">Keys</p>
-        <dl class="keys">
-          <dt>A D &larr; &rarr;</dt><dd>Walk</dd>
-          <dt>Space</dt><dd>Hop</dd>
-          <dt>E</dt><dd>Interact, advance text</dd>
-          <dt>F</dt><dd>Use the selected item</dd>
-          <dt>1&ndash;9 &middot; Q R</dt><dd>Hotbar</dd>
-          <dt>Tab</dt><dd>Phone</dd>
-          <dt>J</dt><dd>Journal</dd>
-          <dt>V</dt><dd>Whistle to the birds</dd>
-          <dt>Shift</dt><dd>Breathe slowly (hold)</dd>
-          <dt>H &middot; M &middot; Esc</dt><dd>Help, mute, pause</dd>
-        </dl>
-      </div>
-
-      <div class="col">
-        <p class="eyebrow">A day in the house</p>
-        <ol class="day">
-          <li><span><b>Feed, water, clean.</b> Fill the bowls with seed, pellets, fruit or nuts, refill the water, scrub the perches. The three icons top-left track it.</span></li>
-          <li><span><b>Then the birds themselves.</b> Pet, whistle, play, hand over treats, comfort whoever is frightened, medicate whoever is unwell. Trust is earned daily.</span></li>
-          <li><span><b>Then Adrian.</b> Answer the phone, put a record on, sit in the garden, look away from what hurts to look at.</span></li>
-          <li><span><b>Sleep.</b> The day ends when he lets it, and the house is different in the morning.</span></li>
-        </ol>
-      </div>
-
-      <div class="col">
-        <p class="eyebrow">What this is</p>
-        <p>
-          Adrian Hale has stopped leaving the hill. Across the garden, under fourteen metres
-          of glass, six parrots depend on him entirely, and that is the only appointment he
-          still keeps.
-        </p>
-        <p>
-          Sanity here is not a bar. It changes what you see, what you hear, what the records
-          say, and whether the hallway ends where the hallway ended yesterday. The birds
-          remember how they were treated. <em>Some of them learn things nobody remembers
-          saying.</em>
-        </p>
-      </div>
-    </section>
-
-    <p class="colophon">
-      Every sprite, room and bird is drawn procedurally at runtime and every sound is
-      synthesized in the browser &mdash; no image or audio files.<br>
-      Progress saves in this browser when Adrian sleeps.
-    </p>
-
-  </div>
+<div class="stage">
+  <canvas id="game" tabindex="0" autofocus aria-label="Hollow Dome"></canvas>
 </div>
 
 <script>/* ===== util.js ===== */
@@ -780,10 +560,10 @@ window.PH = window.PH || {};
 // Keyboard + mouse input with just-pressed tracking.
 (function (PH) {
   'use strict';
-  const I = { down: {}, pressed: {}, released: {}, mouse: { x: 0, y: 0, down: false, clicked: false }, anyKey: false, lastKey: null };
+  const I = { down: {}, pressed: {}, released: {}, vdown: {}, vpressed: {}, mouse: { x: 0, y: 0, down: false, clicked: false }, anyKey: false, lastKey: null };
   const MAP = {
     left: ['ArrowLeft', 'KeyA'], right: ['ArrowRight', 'KeyD'], up: ['ArrowUp', 'KeyW'], down: ['ArrowDown', 'KeyS'],
-    interact: ['KeyE', 'Enter'], use: ['KeyF', 'Space'], jump: ['Space'], phone: ['Tab', 'KeyP'], journal: ['KeyJ'],
+    interact: ['KeyE', 'Enter'], use: ['KeyF', 'Space'], jump: ['Space', 'VirtualHop'], phone: ['Tab', 'KeyP'], journal: ['KeyJ'],
     breathe: ['ShiftLeft', 'ShiftRight'], cancel: ['Escape', 'Backspace'], mute: ['KeyM'], next: ['KeyE', 'KeyQ'],
     sing: ['KeyV'], look: ['KeyL'], help: ['KeyH', 'F1'],
   };
@@ -795,21 +575,181 @@ window.PH = window.PH || {};
       if (e.key && e.key.length === 1) I.typed = e.key;
     });
     window.addEventListener('keyup', (e) => { I.down[e.code] = false; I.released[e.code] = true; });
-    window.addEventListener('blur', () => { I.down = {}; });
-    canvas.addEventListener('mousemove', (e) => {
-      const r = canvas.getBoundingClientRect();
-      I.mouse.x = (e.clientX - r.left) / r.width * PH.W; I.mouse.y = (e.clientY - r.top) / r.height * PH.H;
-    });
-    canvas.addEventListener('mousedown', (e) => { I.mouse.down = true; I.mouse.clicked = true; I.anyKey = true; });
-    canvas.addEventListener('mouseup', () => { I.mouse.down = false; });
+    window.addEventListener('blur', () => { I.down = {}; I.vdown = {}; });
     canvas.addEventListener('wheel', (e) => { I.wheel = Math.sign(e.deltaY); e.preventDefault(); }, { passive: false });
   };
-  I.is = function (action) { const keys = MAP[action]; if (!keys) return false; for (const k of keys) if (I.down[k]) return true; return false; };
-  I.just = function (action) { const keys = MAP[action]; if (!keys) return false; for (const k of keys) if (I.pressed[k]) return true; return false; };
-  I.justKey = function (code) { return !!I.pressed[code]; };
+  I.is = function (action) { const keys = MAP[action]; if (!keys) return false; for (const k of keys) if (I.down[k] || I.vdown[k]) return true; return false; };
+  I.just = function (action) { const keys = MAP[action]; if (!keys) return false; for (const k of keys) if (I.pressed[k] || I.vpressed[k]) return true; return false; };
+  I.justKey = function (code) { return !!(I.pressed[code] || I.vpressed[code]); };
   I.digit = function () { for (let i = 1; i <= 9; i++) if (I.pressed['Digit' + i]) return i; return 0; };
-  I.endFrame = function () { I.pressed = {}; I.released = {}; I.mouse.clicked = false; I.anyKey = false; I.wheel = 0; I.typed = null; };
+  // Virtual input, driven by the on-screen touch controls.
+  I.hold = function (code, on) { if (on) I.vdown[code] = true; else delete I.vdown[code]; };
+  I.tap = function (code) { I.vpressed[code] = true; I.anyKey = true; };
+  I.endFrame = function () { I.pressed = {}; I.released = {}; I.vpressed = {}; I.mouse.clicked = false; I.anyKey = false; I.wheel = 0; I.typed = null; };
   PH.input = I;
+})(window.PH);
+
+/* ===== touch.js ===== */
+// On-screen touch controls, drawn in canvas space so they scale with the pixel art.
+// Buttons drive PH.input's virtual key state, so every existing code path is reused.
+// Tap regions are registered by whatever drew them, so hit areas always match the pixels.
+(function (PH) {
+  'use strict';
+  const I = PH.input;
+  const T = {
+    buttons: [], active: [], pending: [], pointers: {}, enabled: false, armed: false, hint: 0,
+  };
+
+  function btn(id, x, y, w, h, code, kind, glyph) { return { id, x, y, w, h, code, kind, glyph, lit: 0, on: false, rep: 0 }; }
+
+  T.build = function () {
+    T.buttons = [
+      // movement cross, bottom left
+      btn('up', 30, 188, 28, 24, 'ArrowUp', 'hold', 'up'),
+      btn('left', 3, 212, 28, 28, 'ArrowLeft', 'hold', 'left'),
+      btn('right', 57, 212, 28, 28, 'ArrowRight', 'hold', 'right'),
+      btn('down', 30, 240, 28, 24, 'ArrowDown', 'hold', 'down'),
+      // actions, bottom right
+      btn('hop', 384, 179, 40, 28, 'VirtualHop', 'tap', 'hop'),
+      btn('use', 380, 221, 38, 35, 'KeyF', 'tap', 'F'),
+      btn('act', 422, 208, 50, 48, 'KeyE', 'tap', 'E'),
+      // utilities, right edge
+      btn('phone', 452, 30, 26, 24, 'Tab', 'tap', 'phone'),
+      btn('menu', 452, 58, 26, 24, 'Escape', 'tap', 'menu'),
+      btn('breathe', 452, 86, 26, 24, 'ShiftLeft', 'toggle', 'breathe'),
+    ];
+  };
+
+  T.init = function (canvas) {
+    T.build();
+    T.enabled = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches) || (navigator.maxTouchPoints || 0) > 0;
+    const toCanvas = (e) => { const r = canvas.getBoundingClientRect(); return [(e.clientX - r.left) / r.width * PH.W, (e.clientY - r.top) / r.height * PH.H]; };
+    const arm = () => { if (!T.armed) { T.armed = true; if (PH.armAudio) PH.armAudio(); } };
+    canvas.addEventListener('pointerdown', (e) => {
+      const [x, y] = toCanvas(e); I.mouse.x = x; I.mouse.y = y; I.mouse.down = true;
+      if (e.pointerType === 'touch' || e.pointerType === 'pen') { T.enabled = true; T.hint = 0; }
+      arm();
+      if (canvas.setPointerCapture) { try { canvas.setPointerCapture(e.pointerId); } catch (err) { } }
+      T.onDown(e.pointerId, x, y);
+      e.preventDefault();
+    }, { passive: false });
+    canvas.addEventListener('pointermove', (e) => {
+      const [x, y] = toCanvas(e); I.mouse.x = x; I.mouse.y = y;
+      if (T.pointers[e.pointerId] !== undefined) T.onMove(e.pointerId, x, y);
+    }, { passive: true });
+    const end = (e) => { T.onUp(e.pointerId); I.mouse.down = false; };
+    canvas.addEventListener('pointerup', end);
+    canvas.addEventListener('pointercancel', end);
+    canvas.addEventListener('pointerleave', end);
+    canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+  };
+
+  // ---- tap regions: registered while drawing frame N, hit-tested until frame N+1 draws ----
+  T.beginFrame = function () { T.active = T.pending; T.pending = []; };
+  T.region = function (x, y, w, h, fn) { T.pending.push({ x, y, w, h, fn }); };
+  T.regionAll = function (fn) { T.pending.push({ x: 0, y: 0, w: PH.W, h: PH.H, fn }); };
+
+  T.hitButton = function (x, y) {
+    if (!T.enabled || !T.showButtons) return null;
+    for (let i = T.buttons.length - 1; i >= 0; i--) {
+      const b = T.buttons[i];
+      if (x >= b.x - 5 && x <= b.x + b.w + 5 && y >= b.y - 5 && y <= b.y + b.h + 5) return b;
+    }
+    return null;
+  };
+  T.onDown = function (id, x, y) {
+    const b = T.hitButton(x, y);
+    if (b) { T.pointers[id] = b; T.press(b); return; }
+    for (let i = T.active.length - 1; i >= 0; i--) {
+      const r = T.active[i];
+      if (x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h) { T.pointers[id] = null; r.fn(); return; }
+    }
+    T.pointers[id] = null;
+    I.mouse.clicked = true;
+  };
+  T.onMove = function (id, x, y) {
+    const cur = T.pointers[id];
+    const b = T.hitButton(x, y);
+    if (b === cur) return;
+    if (cur && cur.kind === 'hold') T.release(cur);
+    if (b && b.kind === 'hold') { T.pointers[id] = b; T.press(b); } else if (cur && cur.kind === 'hold') T.pointers[id] = null;
+  };
+  T.onUp = function (id) {
+    const b = T.pointers[id];
+    if (b && b.kind === 'hold') T.release(b);
+    delete T.pointers[id];
+  };
+  T.press = function (b) {
+    b.lit = 1;
+    if (b.kind === 'hold') { I.hold(b.code, true); I.tap(b.code); b.rep = 0.36; }
+    else if (b.kind === 'toggle') { b.on = !b.on; I.hold(b.code, b.on); }
+    else I.tap(b.code);
+  };
+  T.release = function (b) { I.hold(b.code, false); b.rep = 0; };
+
+  T.update = function (dt) {
+    const holding = {};
+    for (const id in T.pointers) { const b = T.pointers[id]; if (b) holding[b.id] = true; }
+    for (const b of T.buttons) {
+      if (b.lit > 0) b.lit = Math.max(0, b.lit - dt * 4);
+      // auto-repeat for menu paging, so holding up/down scrolls a list
+      if ((b.id === 'up' || b.id === 'down') && holding[b.id] && b.rep > 0) {
+        b.rep -= dt; if (b.rep <= 0) { I.tap(b.code); b.rep = 0.14; b.lit = 0.7; }
+      }
+      if (b.kind === 'toggle' && b.on) b.lit = Math.max(b.lit, 0.5);
+    }
+  };
+
+  // ---- drawing ----
+  function box(ctx, b) {
+    const lit = Math.min(1, b.lit);
+    ctx.fillStyle = 'rgba(8,7,12,' + (0.42 + lit * 0.34) + ')';
+    ctx.fillRect(b.x, b.y, b.w, b.h);
+    const a = 0.26 + lit * 0.54;
+    ctx.fillStyle = 'rgba(216,201,166,' + a + ')';
+    ctx.fillRect(b.x + 1, b.y, b.w - 2, 1); ctx.fillRect(b.x + 1, b.y + b.h - 1, b.w - 2, 1);
+    ctx.fillRect(b.x, b.y + 1, 1, b.h - 2); ctx.fillRect(b.x + b.w - 1, b.y + 1, 1, b.h - 2);
+    return 'rgba(232,224,208,' + (0.5 + lit * 0.5) + ')';
+  }
+  // one triangle, tip first: column/row i is 2i+1 long, so the point sits at i = 0
+  function arrow(ctx, cx, cy, dir, size, color) {
+    ctx.fillStyle = color;
+    for (let i = 0; i < size; i++) {
+      const run = i * 2 + 1;
+      if (dir === 'left') ctx.fillRect(cx - size / 2 + i, cy - run / 2, 1, run);
+      else if (dir === 'right') ctx.fillRect(cx + size / 2 - i, cy - run / 2, 1, run);
+      else if (dir === 'up') ctx.fillRect(cx - run / 2, cy - size / 2 + i, run, 1);
+      else ctx.fillRect(cx - run / 2, cy + size / 2 - i, run, 1);
+    }
+  }
+  T.draw = function (ctx, game) {
+    T.showButtons = T.enabled && !game.title && !game.ending;
+    if (!T.showButtons) return;
+    const F = PH.font;
+    const inMenu = game.ui.blocking();
+    for (const b of T.buttons) {
+      const cx = b.x + b.w / 2, cy = b.y + b.h / 2;
+      const quiet = (b.id === 'up' || b.id === 'down') && !inMenu && b.lit <= 0;
+      if (quiet) ctx.globalAlpha = 0.45;
+      const col = box(ctx, b);
+      switch (b.glyph) {
+        case 'left': case 'right': case 'up': case 'down': arrow(ctx, cx, cy, b.glyph, 7, col); break;
+        case 'E': F.drawCentered(ctx, 'E', cx, cy - 4, { color: col, scale: 2 }); break;
+        case 'F': F.drawCentered(ctx, 'F', cx, cy - 4, { color: col, scale: 2 }); break;
+        case 'hop': arrow(ctx, cx, cy - 3, 'up', 5, col); ctx.fillStyle = col; ctx.fillRect(cx - 6, cy + 5, 12, 1); break;
+        case 'phone': ctx.globalAlpha = 0.55 + b.lit * 0.45; ctx.drawImage(PH.items.icon('phone'), Math.round(cx - 6), Math.round(cy - 6)); ctx.globalAlpha = 1;
+          if (game.phone && game.phone.totalUnread() > 0) { ctx.fillStyle = '#e04040'; ctx.fillRect(b.x + b.w - 6, b.y + 2, 5, 5); } break;
+        case 'menu': ctx.fillStyle = col; for (let i = 0; i < 3; i++) ctx.fillRect(cx - 6, cy - 4 + i * 4, 12, 1); break;
+        case 'breathe': { ctx.fillStyle = col; const r = 3 + (b.on ? 1 + Math.sin(PH.time * 1.6) * 1.4 : 0); ctx.beginPath(); ctx.arc(cx, cy, Math.max(2, r), 0, 6.29); ctx.fill(); break; }
+      }
+      ctx.globalAlpha = 1;
+    }
+    // one-time orientation nudge: the game is 16:9, so portrait is a thin band
+    if (PH.portrait && !game.ui.blocking()) {
+      PH.font.drawCentered(ctx, 'turn your phone sideways for a bigger screen', PH.W / 2, 118, { color: 'rgba(216,201,166,0.5)', shadow: '#000' });
+    }
+  };
+  PH.touch = T;
 })(window.PH);
 
 /* ===== gfx.js ===== */
@@ -2728,11 +2668,27 @@ window.PH = window.PH || {};
     this.drawHotbar(ctx, game, tier);
     // Dialog
     if (this.dialog) this.drawDialog(ctx, game, gl);
-    if (this.birdMenu) this.drawMenu(ctx, this.birdOptions(this.birdMenu.bird).map((o) => o.t), this.birdMenu.cursor, this.birdMenu.bird.name + ' - ' + this.birdMenu.bird.sp.name);
+    if (this.birdMenu) this.drawMenu(ctx, this.birdOptions(this.birdMenu.bird).map((o) => o.t), this.birdMenu.cursor, this.birdMenu.bird.name + ' - ' + this.birdMenu.bird.sp.name, (i) => { this.birdMenu.cursor = i; });
     if (this.phoneOpen) this.drawPhone(ctx, game, tier);
     if (this.journalOpen) this.drawJournal(ctx, game, PH.W / 2 - 150, 30, 300, 210);
     if (this.help) this.drawHelp(ctx);
-    if (this.paused) { ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(0, 0, PH.W, PH.H); F.drawCentered(ctx, 'PAUSED', PH.W / 2, 110, { color: '#d8c9a6', scale: 2 }); F.drawCentered(ctx, 'Esc to resume  -  H for help  -  M to mute', PH.W / 2, 140, { color: '#a89880' }); F.drawCentered(ctx, 'Progress saves when you sleep.', PH.W / 2, 152, { color: '#6a6058' }); }
+    if (this.paused) {
+      ctx.fillStyle = 'rgba(0,0,0,0.72)'; ctx.fillRect(0, 0, PH.W, PH.H);
+      F.drawCentered(ctx, 'PAUSED', PH.W / 2, 72, { color: '#d8c9a6', scale: 2 });
+      const rows = [
+        ['Resume', () => { this.paused = false; }],
+        ['Controls', () => { this.paused = false; this.help = true; }],
+        ['Journal', () => { this.paused = false; this.journalOpen = true; this.journalPage = Math.max(0, game.story.fragments.length); }],
+        [PH.audio.muted ? 'Sound: off' : 'Sound: on', () => PH.audio.toggleMute()],
+      ];
+      rows.forEach((r, i) => {
+        const ry = 116 + i * 16;
+        F.drawCentered(ctx, r[0], PH.W / 2, ry, { color: '#a89880' });
+        PH.touch.region(PH.W / 2 - 72, ry - 5, 144, 16, () => { PH.audio.click(); r[1](); });
+      });
+      F.drawCentered(ctx, 'Progress saves when Adrian sleeps.', PH.W / 2, 198, { color: '#6a6058' });
+      if (!PH.touch.enabled) F.drawCentered(ctx, 'Esc resume  -  H help  -  M mute', PH.W / 2, 212, { color: '#4a4139' });
+    }
     // Breaking overlay
     if (san.breaking > 0 && san.value <= 0) { ctx.globalAlpha = Math.min(0.85, san.breaking / 45); ctx.fillStyle = '#000'; ctx.fillRect(0, 0, PH.W, PH.H); ctx.globalAlpha = 1; F.drawCentered(ctx, PH.glitchText('go to the birds. or the phone. anything.', 0.15, 3), PH.W / 2, 130, { color: '#cbbfae', wobble: 1.5 }); }
   };
@@ -2747,17 +2703,19 @@ window.PH = window.PH || {};
     const pl = game.player, h = pl.hotbar(); const n = h.length; const w = n * 16 + 4; const x0 = Math.round(PH.W / 2 - w / 2), y0 = PH.H - 24;
     ctx.fillStyle = 'rgba(10,8,14,0.75)'; ctx.fillRect(x0, y0, w, 20);
     h.forEach((id, i) => {
-      let x = x0 + 2 + i * 16 + (tier >= 3 && PH.hash(i, Math.floor(PH.time * 3)) < 0.06 ? 16 : 0);
+      const rx = x0 + 2 + i * 16;
+      if (!this.blocking()) PH.touch.region(rx - 1, y0, 16, 20, () => { pl.slot = i; PH.audio.click(); });
+      let x = rx + (tier >= 3 && PH.hash(i, Math.floor(PH.time * 3)) < 0.06 ? 16 : 0);
       const sel = i === pl.slot; if (sel) { ctx.fillStyle = '#d8c9a6'; ctx.fillRect(x - 1, y0 + 1, 16, 18); ctx.fillStyle = '#2a2430'; ctx.fillRect(x, y0 + 2, 14, 16); }
       let icon = id; if (tier >= 4 && PH.hash(i, Math.floor(PH.time * 2)) < 0.08) icon = PH.pick(['record', 'photo', 'tape']);
       ctx.drawImage(PH.items.icon(icon), x + 1, y0 + 3);
       const cnt = pl.inv[id]; if (cnt > 1) F.draw(ctx, String(cnt), x + 9, y0 + 12, { color: '#fff', shadow: '#000' });
       if (sel) F.drawCentered(ctx, PH.items.label(id), PH.W / 2, y0 - 9, { color: '#d8c9a6', shadow: '#000', glitch: tier >= 2 ? 0.05 : 0 });
     });
-    F.draw(ctx, 'Q/R', x0 - 22, y0 + 6, { color: '#6a6058' }); F.draw(ctx, 'F:use', x0 + w + 4, y0 + 6, { color: '#6a6058' });
+    if (!PH.touch.enabled) { F.draw(ctx, 'Q/R', x0 - 22, y0 + 6, { color: '#6a6058' }); F.draw(ctx, 'F:use', x0 + w + 4, y0 + 6, { color: '#6a6058' }); }
   };
   UI.prototype.drawBirdPanel = function (ctx, b, tier) {
-    const x = PH.W - 118, y = 34, w = 112, h = 62;
+    const x = PH.W - (PH.touch.enabled ? 148 : 118), y = 34, w = 112, h = 62;
     ctx.fillStyle = 'rgba(10,8,14,0.8)'; ctx.fillRect(x, y, w, h); ctx.fillStyle = b.sp.body; ctx.fillRect(x, y, 3, h);
     F.draw(ctx, b.name, x + 6, y + 3, { color: '#fff' }); F.draw(ctx, b.sp.name, x + 6, y + 11, { color: '#a89880' });
     F.draw(ctx, b.mood, x + 6, y + 20, { color: b.mood === 'frightened' || b.mood === 'unwell' || b.mood === 'starving' ? '#e07070' : '#c8d8a0', glitch: tier >= 3 ? 0.1 : 0 });
@@ -2770,16 +2728,18 @@ window.PH = window.PH || {};
     const last = d.idx >= d.lines.length - 1; const choicesH = last && d.choices ? d.choices.length * 10 + 6 : 0;
     const h = fullWrapped.length * 9 + 16 + choicesH; const y = PH.H - 32 - h;
     ctx.fillStyle = 'rgba(8,6,12,0.9)'; ctx.fillRect(x, y, w, h); ctx.fillStyle = '#4a4139'; ctx.fillRect(x, y, w, 1); ctx.fillRect(x, y + h - 1, w, 1);
+    if (last && d.choices) PH.touch.region(x, y, w, h, () => PH.input.tap('KeyE'));
+    else PH.touch.regionAll(() => PH.input.tap('KeyE'));
     wrapped.forEach((l, i) => F.draw(ctx, l, x + 8, y + 8 + i * 9, { color: '#e8e0d0', glitch: gl * 0.35 }));
     if (last && d.choices && d.chars >= line.length) {
-      d.choices.forEach((c, i) => { const cy = y + 8 + fullWrapped.length * 9 + 4 + i * 10; if (i === d.cursor) { ctx.fillStyle = '#d8c9a6'; ctx.fillRect(x + 6, cy + 2, 3, 3); } F.draw(ctx, c.t, x + 14, cy, { color: i === d.cursor ? '#fff8e0' : '#a89880', glitch: gl * 0.4 }); });
+      d.choices.forEach((c, i) => { const cy = y + 8 + fullWrapped.length * 9 + 4 + i * 10; PH.touch.region(x + 2, cy - 3, w - 4, 12, () => { d.cursor = i; PH.input.tap('KeyE'); }); if (i === d.cursor) { ctx.fillStyle = '#d8c9a6'; ctx.fillRect(x + 6, cy + 2, 3, 3); } F.draw(ctx, c.t, x + 14, cy, { color: i === d.cursor ? '#fff8e0' : '#a89880', glitch: gl * 0.4 }); });
     } else if (d.chars >= line.length) { F.drawRight(ctx, last ? '[E] close' : '[E] ...', x + w - 6, y + h - 9, { color: '#6a6058' }); }
   };
-  UI.prototype.drawMenu = function (ctx, opts, cursor, title) {
+  UI.prototype.drawMenu = function (ctx, opts, cursor, title, onPick) {
     const w = 200, h = opts.length * 10 + 22, x = PH.W / 2 - w / 2, y = PH.H / 2 - h / 2;
     ctx.fillStyle = 'rgba(8,6,12,0.92)'; ctx.fillRect(x, y, w, h); ctx.fillStyle = '#4a4139'; ctx.fillRect(x, y, w, 1); ctx.fillRect(x, y + h - 1, w, 1);
     F.draw(ctx, title, x + 8, y + 5, { color: '#d8c9a6' });
-    opts.forEach((o, i) => { const cy = y + 16 + i * 10; if (i === cursor) { ctx.fillStyle = '#d8c9a6'; ctx.fillRect(x + 8, cy + 2, 3, 3); } F.draw(ctx, o, x + 16, cy, { color: i === cursor ? '#fff8e0' : '#a89880' }); });
+    opts.forEach((o, i) => { const cy = y + 16 + i * 10; if (onPick) PH.touch.region(x + 4, cy - 3, w - 8, 12, () => { onPick(i); PH.input.tap('KeyE'); }); if (i === cursor) { ctx.fillStyle = '#d8c9a6'; ctx.fillRect(x + 8, cy + 2, 3, 3); } F.draw(ctx, o, x + 16, cy, { color: i === cursor ? '#fff8e0' : '#a89880' }); });
   };
   UI.prototype.drawPhone = function (ctx, game, tier) {
     const ph = game.phone; const w = 150, h = 230, x = PH.W / 2 - w / 2, y = PH.H / 2 - h / 2;
@@ -2794,6 +2754,7 @@ window.PH = window.PH || {};
       const list = ph.visible();
       list.forEach((c, i) => {
         const cy = y + 30 + i * 20; const sel = i === this.cursor;
+        PH.touch.region(x + 2, cy - 2, w - 4, 19, () => { this.cursor = i; PH.input.tap('KeyE'); });
         if (sel) { ctx.fillStyle = '#1a2a34'; ctx.fillRect(x + 2, cy - 2, w - 4, 19); }
         ctx.fillStyle = c.def.color; ctx.fillRect(x + 6, cy, 12, 12); F.draw(ctx, c.def.name[0], x + 9, cy + 2, { color: '#111' });
         F.draw(ctx, c.def.name + (c.def.dead ? '  (no service)' : ''), x + 22, cy, { color: c.def.dead ? '#707880' : '#e8e0d0', glitch: gl });
@@ -2801,11 +2762,12 @@ window.PH = window.PH || {};
         F.draw(ctx, lastMsg.length > 19 ? lastMsg.slice(0, 18) + '…' : lastMsg, x + 22, cy + 8, { color: '#6a7a80', glitch: gl });
         if (c.unread) { ctx.fillStyle = '#e04040'; ctx.fillRect(x + w - 14, cy + 2, 8, 8); F.draw(ctx, String(c.unread), x + w - 13, cy + 3, { color: '#fff' }); }
       });
-      const ny = y + 30 + list.length * 20; if (this.cursor === list.length) { ctx.fillStyle = '#1a2a34'; ctx.fillRect(x + 2, ny - 2, w - 4, 12); }
+      const ny = y + 30 + list.length * 20; PH.touch.region(x + 2, ny - 3, w - 4, 14, () => { this.cursor = list.length; PH.input.tap('KeyE'); }); if (this.cursor === list.length) { ctx.fillStyle = '#1a2a34'; ctx.fillRect(x + 2, ny - 2, w - 4, 12); }
       F.draw(ctx, 'Notes (' + game.story.fragments.length + ')', x + 22, ny, { color: '#d8c080' });
-      F.drawCentered(ctx, 'Tab: close', x + w / 2, y + h - 10, { color: '#4a5a60' });
+      PH.touch.region(x, y + h - 15, w, 15, () => PH.input.tap('Tab'));
+      F.drawCentered(ctx, PH.touch.enabled ? 'close' : 'Tab: close', x + w / 2, y + h - 10, { color: '#4a5a60' });
     } else if (this.phoneTab === 'chat') {
-      const c = ph.selected; F.draw(ctx, '< ' + c.def.name, x + 6, y + 17, { color: '#e8e0d0' }); F.drawRight(ctx, c.def.role, x + w - 4, y + 17, { color: '#6a7a80' });
+      const c = ph.selected; PH.touch.region(x, y + 13, 72, 14, () => PH.input.tap('Escape')); F.draw(ctx, '< ' + c.def.name, x + 6, y + 17, { color: '#e8e0d0' }); F.drawRight(ctx, c.def.role, x + w - 4, y + 17, { color: '#6a7a80' });
       // messages, bottom-up
       const choicesH = c.pending ? c.pending.choices.length * 10 + 12 : 12;
       let by = y + h - choicesH - 6; const end = c.msgs.length - this.phoneScroll;
@@ -2820,14 +2782,18 @@ window.PH = window.PH || {};
       }
       ctx.fillStyle = '#1e2a30'; ctx.fillRect(x, y + h - choicesH - 2, w, 1);
       if (c.pending) {
-        c.pending.choices.forEach((ch, i) => { const cy = y + h - choicesH + 2 + i * 10; const sel = i === this.cursor; if (sel) { ctx.fillStyle = '#8fb0b8'; ctx.fillRect(x + 4, cy + 2, 3, 3); } const t = ch.t.length > 22 ? ch.t.slice(0, 21) + '…' : ch.t; F.draw(ctx, t, x + 10, cy, { color: sel ? '#fff' : '#8fa0a8', glitch: gl }); });
-        const cy = y + h - 10; const sel = this.cursor === c.pending.choices.length; if (sel) { ctx.fillStyle = '#8fb0b8'; ctx.fillRect(x + 4, cy + 2, 3, 3); } F.draw(ctx, "Don't reply", x + 10, cy, { color: sel ? '#c09090' : '#6a5a60' });
+        c.pending.choices.forEach((ch, i) => { const cy = y + h - choicesH + 2 + i * 10; const sel = i === this.cursor; PH.touch.region(x + 2, cy - 2, w - 4, 11, () => { this.cursor = i; PH.input.tap('KeyE'); }); if (sel) { ctx.fillStyle = '#8fb0b8'; ctx.fillRect(x + 4, cy + 2, 3, 3); } const t = ch.t.length > 22 ? ch.t.slice(0, 21) + '…' : ch.t; F.draw(ctx, t, x + 10, cy, { color: sel ? '#fff' : '#8fa0a8', glitch: gl }); });
+        const cy = y + h - 10; const sel = this.cursor === c.pending.choices.length; PH.touch.region(x + 2, cy - 2, w - 4, 11, () => { this.cursor = c.pending.choices.length; PH.input.tap('KeyE'); }); if (sel) { ctx.fillStyle = '#8fb0b8'; ctx.fillRect(x + 4, cy + 2, 3, 3); } F.draw(ctx, "Don't reply", x + 10, cy, { color: sel ? '#c09090' : '#6a5a60' });
       } else F.drawCentered(ctx, c.def.dead ? '[E] send anyway' : 'no new messages', x + w / 2, y + h - 10, { color: '#4a5a60' });
     } else if (this.phoneTab === 'notes') { this.drawJournal(ctx, game, x, y + 14, w, h - 14, true); }
   };
   UI.prototype.drawJournal = function (ctx, game, x, y, w, h, inPhone) {
     if (!inPhone) { ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(0, 0, PH.W, PH.H); ctx.fillStyle = '#1a1712'; ctx.fillRect(x, y, w, h); ctx.fillStyle = '#4a4139'; ctx.fillRect(x, y, w, 1); ctx.fillRect(x, y + h - 1, w, 1); }
     const fr = game.story.fragments; const maxc = Math.floor((w - 16) / 6);
+    PH.touch.region(x, y + h - 16, w * 0.38, 16, () => PH.input.tap('ArrowLeft'));
+    PH.touch.region(x + w * 0.62, y + h - 16, w * 0.38, 16, () => PH.input.tap('ArrowRight'));
+    PH.touch.region(x + w * 0.38, y + h - 16, w * 0.24, 16, () => PH.input.tap(inPhone ? 'Escape' : 'KeyJ'));
+    if (inPhone) PH.touch.region(x, y, 72, 12, () => PH.input.tap('Escape'));
     F.draw(ctx, inPhone ? '< Notes' : 'JOURNAL', x + 8, y + 5, { color: '#d8c080' });
     const page = this.journalPage; const total = fr.length + 1;
     F.drawRight(ctx, (page + 1) + '/' + total, x + w - 8, y + 5, { color: '#6a6058' });
@@ -2842,12 +2808,31 @@ window.PH = window.PH || {};
       const f = fr[page]; F.draw(ctx, PH.wrapText(f.title, maxc)[0], x + 8, yy, { color: '#e8e0d0' }); yy += 10; F.draw(ctx, 'day ' + f.day, x + 8, yy, { color: '#6a6058' }); yy += 10;
       const lines = PH.wrapText(f.text.replace(/\n/g, ' '), maxc); for (const l of lines) { if (yy > y + h - 12) break; F.draw(ctx, l, x + 8, yy, { color: '#a89880', glitch: game.sanity.tier() >= 3 ? 0.03 : 0 }); yy += 8; }
     }
-    F.drawCentered(ctx, inPhone ? 'up/down: pages' : 'arrows: pages  J: close', x + w / 2, y + h - 9, { color: '#4a5a60' });
+    F.drawCentered(ctx, PH.touch.enabled ? '\u2039  back  \u203a' : (inPhone ? 'up/down: pages' : 'arrows: pages  J: close'), x + w / 2, y + h - 9, { color: '#4a5a60' });
   };
   UI.prototype.drawHelp = function (ctx) {
     ctx.fillStyle = 'rgba(0,0,0,0.85)'; ctx.fillRect(0, 0, PH.W, PH.H);
+    PH.touch.regionAll(() => PH.input.tap('KeyH'));
+    if (PH.touch.enabled) { this.drawTouchHelp(ctx); return; }
     const L = ['HOLLOW DOME', '', 'Move: A/D or arrows     Hop: Space', 'Interact: E             Use item: F', 'Hotbar: 1-9, Q/R, wheel Phone: Tab', 'Journal: J              Breathe: hold Shift', 'Mute: M                 Pause: Esc', '', 'Feed, water and clean for the birds every day.', 'Then look after yourself. Answer the phone.', 'If something is hard to look at, look away.', 'You do not have to do this alone.', '', 'H to close'];
     L.forEach((l, i) => F.drawCentered(ctx, l, PH.W / 2, 40 + i * 12, { color: i === 0 ? '#d8c9a6' : '#a89880', scale: i === 0 ? 2 : 1 }));
+  };
+  UI.prototype.drawTouchHelp = function (ctx) {
+    const L = ['HOLLOW DOME', '',
+      'Arrows move him. Arrows also move the cursor in menus.',
+      'E interacts and advances text. F uses the held item.',
+      'The arrow-over-a-line button hops.',
+      'Tap an item in the bar to hold it. Tap birds, bowls,',
+      'doors and messages directly.',
+      '',
+      'The phone button opens his messages. The circle button',
+      'is slow breathing: leave it on to steady him.',
+      '',
+      'Feed, water and clean for the birds every day.',
+      'Then look after him. Answer people.',
+      'If something is hard to look at, look away.',
+      '', 'tap to close'];
+    L.forEach((l, i) => F.drawCentered(ctx, l, PH.W / 2, 20 + i * 12, { color: i === 0 ? '#d8c9a6' : i === L.length - 1 ? '#4a5a60' : '#a89880', scale: i === 0 ? 2 : 1 }));
   };
   PH.UI = UI;
 })(window.PH);
@@ -2995,8 +2980,9 @@ window.PH = window.PH || {};
     const ctx = bctx; const room = W.room(game.room); const camx = Math.round(game.camx);
     const env = game.env();
     ctx.clearRect(0, 0, PH.W, PH.H);
-    if (game.ending) { PH.endings.draw(ctx, game); screen.drawImage(buf, 0, 0); return; }
-    if (game.title) { PH.endings.drawTitle(ctx, game); screen.drawImage(buf, 0, 0); return; }
+    PH.touch.beginFrame();
+    if (game.ending) { PH.endings.draw(ctx, game); PH.touch.draw(ctx, game); screen.drawImage(buf, 0, 0); return; }
+    if (game.title) { PH.endings.drawTitle(ctx, game); PH.touch.draw(ctx, game); screen.drawImage(buf, 0, 0); return; }
     W.drawBackground(ctx, room, camx, env);
     // back props
     for (const p of room.props) if (p.layer === 'back') drawProp(ctx, room, p, camx, env);
@@ -3016,6 +3002,7 @@ window.PH = window.PH || {};
     drawLights(ctx, game, camx, env);
     postFx(ctx, game, env);
     game.ui.draw(ctx, game);
+    PH.touch.draw(ctx, game);
     screen.drawImage(buf, 0, 0);
   };
   PH.render = R;
@@ -3033,20 +3020,29 @@ window.PH = window.PH || {};
     const g = ctx.createLinearGradient(0, 0, 0, PH.H); g.addColorStop(0, '#07071a'); g.addColorStop(1, '#1a1a34'); ctx.fillStyle = g; ctx.fillRect(0, 0, PH.W, PH.H);
     for (let i = 0; i < 80; i++) { ctx.fillStyle = 'rgba(255,255,255,' + (0.3 + PH.hash(i, Math.floor(t * 2)) * 0.5) + ')'; ctx.fillRect((i * 97 + 13) % PH.W, (i * 53) % 150, 1, 1); }
     // dome silhouette lit from inside
-    ctx.fillStyle = '#0c0c18'; ctx.fillRect(0, 200, PH.W, 70);
-    ctx.beginPath(); ctx.ellipse(PH.W / 2, 200, 150, 110, 0, Math.PI, 0); ctx.fillStyle = 'rgba(255,230,180,0.10)'; ctx.fill();
-    ctx.strokeStyle = '#4a5058'; ctx.lineWidth = 2; ctx.stroke();
-    for (let i = 0; i <= 8; i++) { const a = Math.PI + (i / 8) * Math.PI; ctx.beginPath(); ctx.moveTo(PH.W / 2, 200); ctx.lineTo(PH.W / 2 + Math.cos(a) * 150, 200 + Math.sin(a) * 110); ctx.stroke(); }
+    const fy = 184, rx = 126, ry = 90;
+    ctx.fillStyle = '#0c0c18'; ctx.fillRect(0, fy, PH.W, PH.H - fy);
+    ctx.beginPath(); ctx.ellipse(PH.W / 2, fy, rx, ry, 0, Math.PI, 0); ctx.fillStyle = 'rgba(255,230,180,0.10)'; ctx.fill();
+    ctx.strokeStyle = '#4a5058'; ctx.lineWidth = 1; ctx.stroke();
+    for (let i = 0; i <= 8; i++) { const a = Math.PI + (i / 8) * Math.PI; ctx.beginPath(); ctx.moveTo(PH.W / 2, fy); ctx.lineTo(PH.W / 2 + Math.cos(a) * rx, fy + Math.sin(a) * ry); ctx.stroke(); }
     // bird silhouettes on perches
-    ctx.fillStyle = '#1a1a26'; ctx.fillRect(PH.W / 2 - 80, 150, 60, 2); ctx.fillRect(PH.W / 2 + 20, 130, 70, 2);
-    [[PH.W / 2 - 60, 150], [PH.W / 2 - 40, 150], [PH.W / 2 + 40, 130], [PH.W / 2 + 70, 130]].forEach((p, i) => { const bob = Math.sin(t * 2 + i) * 0.5; ctx.fillStyle = '#1a1a26'; ctx.beginPath(); ctx.ellipse(p[0], p[1] - 5 + bob, 5, 4, 0, 0, 7); ctx.fill(); ctx.beginPath(); ctx.arc(p[0] + 4, p[1] - 9 + bob, 3, 0, 7); ctx.fill(); });
+    ctx.fillStyle = '#1a1a26'; ctx.fillRect(PH.W / 2 - 74, 142, 56, 2); ctx.fillRect(PH.W / 2 + 18, 124, 64, 2);
+    [[PH.W / 2 - 56, 142], [PH.W / 2 - 36, 142], [PH.W / 2 + 36, 124], [PH.W / 2 + 64, 124]].forEach((p, i) => { const bob = Math.sin(t * 2 + i) * 0.5; ctx.fillStyle = '#1a1a26'; ctx.beginPath(); ctx.ellipse(p[0], p[1] - 5 + bob, 5, 4, 0, 0, 7); ctx.fill(); ctx.beginPath(); ctx.arc(p[0] + 4, p[1] - 9 + bob, 3, 0, 7); ctx.fill(); });
     // a man, small, at the dome door
-    ctx.fillStyle = '#0a0a12'; ctx.fillRect(PH.W / 2 + 140, 176, 5, 24);
-    F.drawCentered(ctx, 'HOLLOW DOME', PH.W / 2, 40, { color: '#d8c9a6', scale: 3, glitch: 0.01 });
-    F.drawCentered(ctx, 'six parrots. one man. a house on a hill.', PH.W / 2, 70, { color: '#8a7a68' });
-    const has = !!localStorage.getItem('hollowdome_save');
-    const opts = game.titleOpts(); opts.forEach((o, i) => { const y = 226 + i * 11; if (i === game.titleCursor) { ctx.fillStyle = '#d8c9a6'; ctx.fillRect(PH.W / 2 - 60, y + 2, 3, 3); } F.drawCentered(ctx, o.t, PH.W / 2, y, { color: i === game.titleCursor ? '#fff8e0' : '#a89880' }); });
-    F.drawCentered(ctx, 'Enter to choose  -  H for help', PH.W / 2, 258, { color: '#4a4139' });
+    ctx.fillStyle = '#0a0a12'; ctx.fillRect(PH.W / 2 + 118, 162, 5, 22);
+    F.drawCentered(ctx, 'HOLLOW DOME', PH.W / 2, 30, { color: '#d8c9a6', scale: 3, glitch: 0.01 });
+    F.drawCentered(ctx, 'six parrots. one man. a house on a hill.', PH.W / 2, 60, { color: '#8a7a68' });
+    const opts = game.titleOpts();
+    opts.forEach((o, i) => {
+      const y = 188 + i * 12;
+      PH.touch.region(PH.W / 2 - 84, y - 5, 168, 13, () => { game.titleCursor = i; PH.input.tap('KeyE'); });
+      if (i === game.titleCursor) { ctx.fillStyle = '#d8c9a6'; ctx.fillRect(PH.W / 2 - 62, y + 2, 3, 3); }
+      F.drawCentered(ctx, o.t, PH.W / 2, y, { color: i === game.titleCursor ? '#fff8e0' : '#a89880' });
+    });
+    ctx.fillStyle = '#8a1220'; ctx.fillRect(PH.W / 2 - 122, 230, 1, 22);
+    ['Contains psychological horror: depression, suicidal', 'ideation (non-instructional), blood, surreal imagery.', 'If any of it is close to home, please tell someone.']
+      .forEach((l, i) => F.draw(ctx, l, PH.W / 2 - 114, 230 + i * 8, { color: '#6a6058' }));
+    F.drawCentered(ctx, PH.touch.enabled ? 'tap an option' : 'Enter to choose  -  H for help', PH.W / 2, 257, { color: '#4a4139' });
   };
 
   E.drawDeadAviary = function (ctx, game, camx, env) {
@@ -3104,7 +3100,8 @@ window.PH = window.PH || {};
     },
   };
   E.draw = function (ctx, game) {
-    const e = game.ending; const script = E.scripts[e.kind](game); const s = script[Math.min(e.stage, script.length - 1)];
+    const e = game.ending;
+    PH.touch.regionAll(() => PH.input.tap('KeyE')); const script = E.scripts[e.kind](game); const s = script[Math.min(e.stage, script.length - 1)];
     // background
     ctx.fillStyle = '#050407'; ctx.fillRect(0, 0, PH.W, PH.H);
     if (s.bg === 'road') { const g = ctx.createLinearGradient(0, 0, 0, 200); g.addColorStop(0, '#d99a7a'); g.addColorStop(1, '#f0c8a0'); ctx.fillStyle = g; ctx.fillRect(0, 0, PH.W, 200); ctx.fillStyle = '#2a3a28'; ctx.fillRect(0, 200, PH.W, 70); ctx.fillStyle = '#5b4632'; ctx.beginPath(); ctx.moveTo(200, 200); ctx.lineTo(280, 200); ctx.lineTo(480, 270); ctx.lineTo(60, 270); ctx.fill(); ctx.drawImage(Pr.get('gate'), 300, 140); ctx.fillStyle = '#3a3a3a'; ctx.fillRect(340, 180, 60, 20); ctx.drawImage(game.player.frames.idle[0], 250, 168); ctx.fillStyle = '#5a3a4a'; ctx.fillRect(350, 160, 10, 20); ctx.fillStyle = '#d9b39a'; ctx.fillRect(351, 152, 8, 8); ctx.fillStyle = '#c8a060'; ctx.fillRect(362, 170, 8, 6); }
@@ -3125,7 +3122,7 @@ window.PH = window.PH || {};
     ctx.fillStyle = 'rgba(0,0,0,' + (isBlack ? 0 : 0.55) + ')'; if (!isBlack) ctx.fillRect(0, 26, PH.W, 4 + lines.reduce((a, l) => a + PH.wrapText(l, 70).length * 9 + 6, 0));
     const shown = Math.floor(e.t * 60); let count = 0;
     for (const l of lines) { const isTitle = l === l.toUpperCase() && l.length > 3 && l.length < 20 && !l.includes(' ') === false && ['CONNECTION', 'THE AVIARY', 'COLLAPSE'].includes(l); const wrapped = PH.wrapText(l, 70); for (const wl of wrapped) { const vis = wl.slice(0, Math.max(0, shown - count)); count += wl.length; if (isTitle) F.drawCentered(ctx, vis, PH.W / 2, y + 4, { color: '#d8c9a6', scale: 2 }); else F.draw(ctx, vis, 30, y, { color: '#e8e0d0' }); y += isTitle ? 20 : 9; } y += 6; }
-    if (e.t > 0.8) F.drawRight(ctx, e.stage >= script.length - 1 ? '[E] title' : '[E]', PH.W - 12, PH.H - 12, { color: '#6a6058' });
+    if (e.t > 0.8) F.drawRight(ctx, PH.touch.enabled ? (e.stage >= script.length - 1 ? 'tap for title' : 'tap') : (e.stage >= script.length - 1 ? '[E] title' : '[E]'), PH.W - 12, PH.H - 12, { color: '#6a6058' });
   };
   PH.endings = E;
 })(window.PH);
@@ -3302,6 +3299,7 @@ window.PH = window.PH || {};
   // ---------- Update ----------
   function update(dt) {
     PH.time += dt; const I = PH.input;
+    PH.touch.update(dt);
     if (I.just('mute')) PH.audio.toggleMute();
     if (game.title) {
       if (game.ui.help) { if (I.just('help') || I.just('cancel') || I.just('interact')) game.ui.help = false; return; }
@@ -3349,9 +3347,19 @@ window.PH = window.PH || {};
   function boot() {
     const canvas = document.getElementById('game'); const sctx = canvas.getContext('2d');
     canvas.width = PH.W; canvas.height = PH.H; sctx.imageSmoothingEnabled = false;
-    function resize() { const s = Math.max(1, Math.floor(Math.min(window.innerWidth / PH.W, window.innerHeight / PH.H))); canvas.style.width = PH.W * s + 'px'; canvas.style.height = PH.H * s + 'px'; }
-    window.addEventListener('resize', resize); resize();
-    PH.input.init(canvas); PH.render.init(); build();
+    function resize() {
+      const vw = Math.max(160, window.innerWidth), vh = Math.max(120, window.innerHeight);
+      let s = Math.min(vw / PH.W, vh / PH.H);
+      if (s >= 2) s = Math.floor(s); // whole-pixel scaling once there is room for it
+      canvas.style.width = Math.max(1, Math.floor(PH.W * s)) + 'px';
+      canvas.style.height = Math.max(1, Math.floor(PH.H * s)) + 'px';
+      PH.portrait = vh > vw;
+    }
+    window.addEventListener('resize', resize);
+    window.addEventListener('orientationchange', () => setTimeout(resize, 120));
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', resize);
+    resize();
+    PH.input.init(canvas); PH.touch.init(canvas); PH.render.init(); build();
     const bootEl = document.getElementById('boot');
     const go = () => { if (bootEl) bootEl.style.display = 'none'; PH.audio.init(); PH.audio.resume(); canvas.focus(); };
     PH.armAudio = go;
@@ -3368,20 +3376,19 @@ window.PH = window.PH || {};
 </script>
 <script>
   (function () {
-    var curtain = document.getElementById('curtain');
-    var begin = document.getElementById('begin');
-    var canvas = document.getElementById('game');
-    function play() {
-      curtain.hidden = true;
-      if (window.PH && PH.armAudio) PH.armAudio();
-      if (canvas) canvas.focus();
+    // the Artifact host supplies this; a standalone copy of the file does not,
+    // and without it a phone lays the page out at 980px and the game renders oversized
+    if (!document.querySelector('meta[name="viewport"]')) {
+      var m = document.createElement('meta');
+      m.name = 'viewport';
+      m.content = 'width=device-width, initial-scale=1, viewport-fit=cover';
+      document.head.appendChild(m);
     }
-    begin.addEventListener('click', play);
-    canvas.addEventListener('click', function () { if (!curtain.hidden) play(); });
-    window.addEventListener('keydown', function once(e) {
-      if (e.target === begin) return;
-      if (!curtain.hidden) play();
-      window.removeEventListener('keydown', once);
-    });
+    var c = document.getElementById('game');
+    if (c) c.focus();
+    // keep the keyboard pointed at the game on desktop, and swallow stray gestures on mobile
+    window.addEventListener('pointerdown', function () { if (c) c.focus(); });
+    document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
+    document.addEventListener('dblclick', function (e) { e.preventDefault(); });
   })();
 </script>

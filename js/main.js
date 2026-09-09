@@ -169,6 +169,7 @@
   // ---------- Update ----------
   function update(dt) {
     PH.time += dt; const I = PH.input;
+    PH.touch.update(dt);
     if (I.just('mute')) PH.audio.toggleMute();
     if (game.title) {
       if (game.ui.help) { if (I.just('help') || I.just('cancel') || I.just('interact')) game.ui.help = false; return; }
@@ -216,9 +217,19 @@
   function boot() {
     const canvas = document.getElementById('game'); const sctx = canvas.getContext('2d');
     canvas.width = PH.W; canvas.height = PH.H; sctx.imageSmoothingEnabled = false;
-    function resize() { const s = Math.max(1, Math.floor(Math.min(window.innerWidth / PH.W, window.innerHeight / PH.H))); canvas.style.width = PH.W * s + 'px'; canvas.style.height = PH.H * s + 'px'; }
-    window.addEventListener('resize', resize); resize();
-    PH.input.init(canvas); PH.render.init(); build();
+    function resize() {
+      const vw = Math.max(160, window.innerWidth), vh = Math.max(120, window.innerHeight);
+      let s = Math.min(vw / PH.W, vh / PH.H);
+      if (s >= 2) s = Math.floor(s); // whole-pixel scaling once there is room for it
+      canvas.style.width = Math.max(1, Math.floor(PH.W * s)) + 'px';
+      canvas.style.height = Math.max(1, Math.floor(PH.H * s)) + 'px';
+      PH.portrait = vh > vw;
+    }
+    window.addEventListener('resize', resize);
+    window.addEventListener('orientationchange', () => setTimeout(resize, 120));
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', resize);
+    resize();
+    PH.input.init(canvas); PH.touch.init(canvas); PH.render.init(); build();
     const bootEl = document.getElementById('boot');
     const go = () => { if (bootEl) bootEl.style.display = 'none'; PH.audio.init(); PH.audio.resume(); canvas.focus(); };
     PH.armAudio = go;

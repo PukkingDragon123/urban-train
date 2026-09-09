@@ -140,8 +140,9 @@
     const ctx = bctx; const room = W.room(game.room); const camx = Math.round(game.camx);
     const env = game.env();
     ctx.clearRect(0, 0, PH.W, PH.H);
-    if (game.ending) { PH.endings.draw(ctx, game); screen.drawImage(buf, 0, 0); return; }
-    if (game.title) { PH.endings.drawTitle(ctx, game); screen.drawImage(buf, 0, 0); return; }
+    PH.touch.beginFrame();
+    if (game.ending) { PH.endings.draw(ctx, game); PH.touch.draw(ctx, game); screen.drawImage(buf, 0, 0); return; }
+    if (game.title) { PH.endings.drawTitle(ctx, game); PH.touch.draw(ctx, game); screen.drawImage(buf, 0, 0); return; }
     W.drawBackground(ctx, room, camx, env);
     // back props
     for (const p of room.props) if (p.layer === 'back') drawProp(ctx, room, p, camx, env);
@@ -161,6 +162,7 @@
     drawLights(ctx, game, camx, env);
     postFx(ctx, game, env);
     game.ui.draw(ctx, game);
+    PH.touch.draw(ctx, game);
     screen.drawImage(buf, 0, 0);
   };
   PH.render = R;

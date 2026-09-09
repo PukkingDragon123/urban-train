@@ -9,20 +9,29 @@
     const g = ctx.createLinearGradient(0, 0, 0, PH.H); g.addColorStop(0, '#07071a'); g.addColorStop(1, '#1a1a34'); ctx.fillStyle = g; ctx.fillRect(0, 0, PH.W, PH.H);
     for (let i = 0; i < 80; i++) { ctx.fillStyle = 'rgba(255,255,255,' + (0.3 + PH.hash(i, Math.floor(t * 2)) * 0.5) + ')'; ctx.fillRect((i * 97 + 13) % PH.W, (i * 53) % 150, 1, 1); }
     // dome silhouette lit from inside
-    ctx.fillStyle = '#0c0c18'; ctx.fillRect(0, 200, PH.W, 70);
-    ctx.beginPath(); ctx.ellipse(PH.W / 2, 200, 150, 110, 0, Math.PI, 0); ctx.fillStyle = 'rgba(255,230,180,0.10)'; ctx.fill();
-    ctx.strokeStyle = '#4a5058'; ctx.lineWidth = 2; ctx.stroke();
-    for (let i = 0; i <= 8; i++) { const a = Math.PI + (i / 8) * Math.PI; ctx.beginPath(); ctx.moveTo(PH.W / 2, 200); ctx.lineTo(PH.W / 2 + Math.cos(a) * 150, 200 + Math.sin(a) * 110); ctx.stroke(); }
+    const fy = 184, rx = 126, ry = 90;
+    ctx.fillStyle = '#0c0c18'; ctx.fillRect(0, fy, PH.W, PH.H - fy);
+    ctx.beginPath(); ctx.ellipse(PH.W / 2, fy, rx, ry, 0, Math.PI, 0); ctx.fillStyle = 'rgba(255,230,180,0.10)'; ctx.fill();
+    ctx.strokeStyle = '#4a5058'; ctx.lineWidth = 1; ctx.stroke();
+    for (let i = 0; i <= 8; i++) { const a = Math.PI + (i / 8) * Math.PI; ctx.beginPath(); ctx.moveTo(PH.W / 2, fy); ctx.lineTo(PH.W / 2 + Math.cos(a) * rx, fy + Math.sin(a) * ry); ctx.stroke(); }
     // bird silhouettes on perches
-    ctx.fillStyle = '#1a1a26'; ctx.fillRect(PH.W / 2 - 80, 150, 60, 2); ctx.fillRect(PH.W / 2 + 20, 130, 70, 2);
-    [[PH.W / 2 - 60, 150], [PH.W / 2 - 40, 150], [PH.W / 2 + 40, 130], [PH.W / 2 + 70, 130]].forEach((p, i) => { const bob = Math.sin(t * 2 + i) * 0.5; ctx.fillStyle = '#1a1a26'; ctx.beginPath(); ctx.ellipse(p[0], p[1] - 5 + bob, 5, 4, 0, 0, 7); ctx.fill(); ctx.beginPath(); ctx.arc(p[0] + 4, p[1] - 9 + bob, 3, 0, 7); ctx.fill(); });
+    ctx.fillStyle = '#1a1a26'; ctx.fillRect(PH.W / 2 - 74, 142, 56, 2); ctx.fillRect(PH.W / 2 + 18, 124, 64, 2);
+    [[PH.W / 2 - 56, 142], [PH.W / 2 - 36, 142], [PH.W / 2 + 36, 124], [PH.W / 2 + 64, 124]].forEach((p, i) => { const bob = Math.sin(t * 2 + i) * 0.5; ctx.fillStyle = '#1a1a26'; ctx.beginPath(); ctx.ellipse(p[0], p[1] - 5 + bob, 5, 4, 0, 0, 7); ctx.fill(); ctx.beginPath(); ctx.arc(p[0] + 4, p[1] - 9 + bob, 3, 0, 7); ctx.fill(); });
     // a man, small, at the dome door
-    ctx.fillStyle = '#0a0a12'; ctx.fillRect(PH.W / 2 + 140, 176, 5, 24);
-    F.drawCentered(ctx, 'HOLLOW DOME', PH.W / 2, 40, { color: '#d8c9a6', scale: 3, glitch: 0.01 });
-    F.drawCentered(ctx, 'six parrots. one man. a house on a hill.', PH.W / 2, 70, { color: '#8a7a68' });
-    const has = !!localStorage.getItem('hollowdome_save');
-    const opts = game.titleOpts(); opts.forEach((o, i) => { const y = 226 + i * 11; if (i === game.titleCursor) { ctx.fillStyle = '#d8c9a6'; ctx.fillRect(PH.W / 2 - 60, y + 2, 3, 3); } F.drawCentered(ctx, o.t, PH.W / 2, y, { color: i === game.titleCursor ? '#fff8e0' : '#a89880' }); });
-    F.drawCentered(ctx, 'Enter to choose  -  H for help', PH.W / 2, 258, { color: '#4a4139' });
+    ctx.fillStyle = '#0a0a12'; ctx.fillRect(PH.W / 2 + 118, 162, 5, 22);
+    F.drawCentered(ctx, 'HOLLOW DOME', PH.W / 2, 30, { color: '#d8c9a6', scale: 3, glitch: 0.01 });
+    F.drawCentered(ctx, 'six parrots. one man. a house on a hill.', PH.W / 2, 60, { color: '#8a7a68' });
+    const opts = game.titleOpts();
+    opts.forEach((o, i) => {
+      const y = 188 + i * 12;
+      PH.touch.region(PH.W / 2 - 84, y - 5, 168, 13, () => { game.titleCursor = i; PH.input.tap('KeyE'); });
+      if (i === game.titleCursor) { ctx.fillStyle = '#d8c9a6'; ctx.fillRect(PH.W / 2 - 62, y + 2, 3, 3); }
+      F.drawCentered(ctx, o.t, PH.W / 2, y, { color: i === game.titleCursor ? '#fff8e0' : '#a89880' });
+    });
+    ctx.fillStyle = '#8a1220'; ctx.fillRect(PH.W / 2 - 122, 230, 1, 22);
+    ['Contains psychological horror: depression, suicidal', 'ideation (non-instructional), blood, surreal imagery.', 'If any of it is close to home, please tell someone.']
+      .forEach((l, i) => F.draw(ctx, l, PH.W / 2 - 114, 230 + i * 8, { color: '#6a6058' }));
+    F.drawCentered(ctx, PH.touch.enabled ? 'tap an option' : 'Enter to choose  -  H for help', PH.W / 2, 257, { color: '#4a4139' });
   };
 
   E.drawDeadAviary = function (ctx, game, camx, env) {
@@ -80,7 +89,8 @@
     },
   };
   E.draw = function (ctx, game) {
-    const e = game.ending; const script = E.scripts[e.kind](game); const s = script[Math.min(e.stage, script.length - 1)];
+    const e = game.ending;
+    PH.touch.regionAll(() => PH.input.tap('KeyE')); const script = E.scripts[e.kind](game); const s = script[Math.min(e.stage, script.length - 1)];
     // background
     ctx.fillStyle = '#050407'; ctx.fillRect(0, 0, PH.W, PH.H);
     if (s.bg === 'road') { const g = ctx.createLinearGradient(0, 0, 0, 200); g.addColorStop(0, '#d99a7a'); g.addColorStop(1, '#f0c8a0'); ctx.fillStyle = g; ctx.fillRect(0, 0, PH.W, 200); ctx.fillStyle = '#2a3a28'; ctx.fillRect(0, 200, PH.W, 70); ctx.fillStyle = '#5b4632'; ctx.beginPath(); ctx.moveTo(200, 200); ctx.lineTo(280, 200); ctx.lineTo(480, 270); ctx.lineTo(60, 270); ctx.fill(); ctx.drawImage(Pr.get('gate'), 300, 140); ctx.fillStyle = '#3a3a3a'; ctx.fillRect(340, 180, 60, 20); ctx.drawImage(game.player.frames.idle[0], 250, 168); ctx.fillStyle = '#5a3a4a'; ctx.fillRect(350, 160, 10, 20); ctx.fillStyle = '#d9b39a'; ctx.fillRect(351, 152, 8, 8); ctx.fillStyle = '#c8a060'; ctx.fillRect(362, 170, 8, 6); }
@@ -101,7 +111,7 @@
     ctx.fillStyle = 'rgba(0,0,0,' + (isBlack ? 0 : 0.55) + ')'; if (!isBlack) ctx.fillRect(0, 26, PH.W, 4 + lines.reduce((a, l) => a + PH.wrapText(l, 70).length * 9 + 6, 0));
     const shown = Math.floor(e.t * 60); let count = 0;
     for (const l of lines) { const isTitle = l === l.toUpperCase() && l.length > 3 && l.length < 20 && !l.includes(' ') === false && ['CONNECTION', 'THE AVIARY', 'COLLAPSE'].includes(l); const wrapped = PH.wrapText(l, 70); for (const wl of wrapped) { const vis = wl.slice(0, Math.max(0, shown - count)); count += wl.length; if (isTitle) F.drawCentered(ctx, vis, PH.W / 2, y + 4, { color: '#d8c9a6', scale: 2 }); else F.draw(ctx, vis, 30, y, { color: '#e8e0d0' }); y += isTitle ? 20 : 9; } y += 6; }
-    if (e.t > 0.8) F.drawRight(ctx, e.stage >= script.length - 1 ? '[E] title' : '[E]', PH.W - 12, PH.H - 12, { color: '#6a6058' });
+    if (e.t > 0.8) F.drawRight(ctx, PH.touch.enabled ? (e.stage >= script.length - 1 ? 'tap for title' : 'tap') : (e.stage >= script.length - 1 ? '[E] title' : '[E]'), PH.W - 12, PH.H - 12, { color: '#6a6058' });
   };
   PH.endings = E;
 })(window.PH);

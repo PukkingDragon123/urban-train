@@ -132,11 +132,27 @@
     this.drawHotbar(ctx, game, tier);
     // Dialog
     if (this.dialog) this.drawDialog(ctx, game, gl);
-    if (this.birdMenu) this.drawMenu(ctx, this.birdOptions(this.birdMenu.bird).map((o) => o.t), this.birdMenu.cursor, this.birdMenu.bird.name + ' - ' + this.birdMenu.bird.sp.name);
+    if (this.birdMenu) this.drawMenu(ctx, this.birdOptions(this.birdMenu.bird).map((o) => o.t), this.birdMenu.cursor, this.birdMenu.bird.name + ' - ' + this.birdMenu.bird.sp.name, (i) => { this.birdMenu.cursor = i; });
     if (this.phoneOpen) this.drawPhone(ctx, game, tier);
     if (this.journalOpen) this.drawJournal(ctx, game, PH.W / 2 - 150, 30, 300, 210);
     if (this.help) this.drawHelp(ctx);
-    if (this.paused) { ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(0, 0, PH.W, PH.H); F.drawCentered(ctx, 'PAUSED', PH.W / 2, 110, { color: '#d8c9a6', scale: 2 }); F.drawCentered(ctx, 'Esc to resume  -  H for help  -  M to mute', PH.W / 2, 140, { color: '#a89880' }); F.drawCentered(ctx, 'Progress saves when you sleep.', PH.W / 2, 152, { color: '#6a6058' }); }
+    if (this.paused) {
+      ctx.fillStyle = 'rgba(0,0,0,0.72)'; ctx.fillRect(0, 0, PH.W, PH.H);
+      F.drawCentered(ctx, 'PAUSED', PH.W / 2, 72, { color: '#d8c9a6', scale: 2 });
+      const rows = [
+        ['Resume', () => { this.paused = false; }],
+        ['Controls', () => { this.paused = false; this.help = true; }],
+        ['Journal', () => { this.paused = false; this.journalOpen = true; this.journalPage = Math.max(0, game.story.fragments.length); }],
+        [PH.audio.muted ? 'Sound: off' : 'Sound: on', () => PH.audio.toggleMute()],
+      ];
+      rows.forEach((r, i) => {
+        const ry = 116 + i * 16;
+        F.drawCentered(ctx, r[0], PH.W / 2, ry, { color: '#a89880' });
+        PH.touch.region(PH.W / 2 - 72, ry - 5, 144, 16, () => { PH.audio.click(); r[1](); });
+      });
+      F.drawCentered(ctx, 'Progress saves when Adrian sleeps.', PH.W / 2, 198, { color: '#6a6058' });
+      if (!PH.touch.enabled) F.drawCentered(ctx, 'Esc resume  -  H help  -  M mute', PH.W / 2, 212, { color: '#4a4139' });
+    }
     // Breaking overlay
     if (san.breaking > 0 && san.value <= 0) { ctx.globalAlpha = Math.min(0.85, san.breaking / 45); ctx.fillStyle = '#000'; ctx.fillRect(0, 0, PH.W, PH.H); ctx.globalAlpha = 1; F.drawCentered(ctx, PH.glitchText('go to the birds. or the phone. anything.', 0.15, 3), PH.W / 2, 130, { color: '#cbbfae', wobble: 1.5 }); }
   };
@@ -151,17 +167,19 @@
     const pl = game.player, h = pl.hotbar(); const n = h.length; const w = n * 16 + 4; const x0 = Math.round(PH.W / 2 - w / 2), y0 = PH.H - 24;
     ctx.fillStyle = 'rgba(10,8,14,0.75)'; ctx.fillRect(x0, y0, w, 20);
     h.forEach((id, i) => {
-      let x = x0 + 2 + i * 16 + (tier >= 3 && PH.hash(i, Math.floor(PH.time * 3)) < 0.06 ? 16 : 0);
+      const rx = x0 + 2 + i * 16;
+      if (!this.blocking()) PH.touch.region(rx - 1, y0, 16, 20, () => { pl.slot = i; PH.audio.click(); });
+      let x = rx + (tier >= 3 && PH.hash(i, Math.floor(PH.time * 3)) < 0.06 ? 16 : 0);
       const sel = i === pl.slot; if (sel) { ctx.fillStyle = '#d8c9a6'; ctx.fillRect(x - 1, y0 + 1, 16, 18); ctx.fillStyle = '#2a2430'; ctx.fillRect(x, y0 + 2, 14, 16); }
       let icon = id; if (tier >= 4 && PH.hash(i, Math.floor(PH.time * 2)) < 0.08) icon = PH.pick(['record', 'photo', 'tape']);
       ctx.drawImage(PH.items.icon(icon), x + 1, y0 + 3);
       const cnt = pl.inv[id]; if (cnt > 1) F.draw(ctx, String(cnt), x + 9, y0 + 12, { color: '#fff', shadow: '#000' });
       if (sel) F.drawCentered(ctx, PH.items.label(id), PH.W / 2, y0 - 9, { color: '#d8c9a6', shadow: '#000', glitch: tier >= 2 ? 0.05 : 0 });
     });
-    F.draw(ctx, 'Q/R', x0 - 22, y0 + 6, { color: '#6a6058' }); F.draw(ctx, 'F:use', x0 + w + 4, y0 + 6, { color: '#6a6058' });
+    if (!PH.touch.enabled) { F.draw(ctx, 'Q/R', x0 - 22, y0 + 6, { color: '#6a6058' }); F.draw(ctx, 'F:use', x0 + w + 4, y0 + 6, { color: '#6a6058' }); }
   };
   UI.prototype.drawBirdPanel = function (ctx, b, tier) {
-    const x = PH.W - 118, y = 34, w = 112, h = 62;
+    const x = PH.W - (PH.touch.enabled ? 148 : 118), y = 34, w = 112, h = 62;
     ctx.fillStyle = 'rgba(10,8,14,0.8)'; ctx.fillRect(x, y, w, h); ctx.fillStyle = b.sp.body; ctx.fillRect(x, y, 3, h);
     F.draw(ctx, b.name, x + 6, y + 3, { color: '#fff' }); F.draw(ctx, b.sp.name, x + 6, y + 11, { color: '#a89880' });
     F.draw(ctx, b.mood, x + 6, y + 20, { color: b.mood === 'frightened' || b.mood === 'unwell' || b.mood === 'starving' ? '#e07070' : '#c8d8a0', glitch: tier >= 3 ? 0.1 : 0 });
@@ -174,16 +192,18 @@
     const last = d.idx >= d.lines.length - 1; const choicesH = last && d.choices ? d.choices.length * 10 + 6 : 0;
     const h = fullWrapped.length * 9 + 16 + choicesH; const y = PH.H - 32 - h;
     ctx.fillStyle = 'rgba(8,6,12,0.9)'; ctx.fillRect(x, y, w, h); ctx.fillStyle = '#4a4139'; ctx.fillRect(x, y, w, 1); ctx.fillRect(x, y + h - 1, w, 1);
+    if (last && d.choices) PH.touch.region(x, y, w, h, () => PH.input.tap('KeyE'));
+    else PH.touch.regionAll(() => PH.input.tap('KeyE'));
     wrapped.forEach((l, i) => F.draw(ctx, l, x + 8, y + 8 + i * 9, { color: '#e8e0d0', glitch: gl * 0.35 }));
     if (last && d.choices && d.chars >= line.length) {
-      d.choices.forEach((c, i) => { const cy = y + 8 + fullWrapped.length * 9 + 4 + i * 10; if (i === d.cursor) { ctx.fillStyle = '#d8c9a6'; ctx.fillRect(x + 6, cy + 2, 3, 3); } F.draw(ctx, c.t, x + 14, cy, { color: i === d.cursor ? '#fff8e0' : '#a89880', glitch: gl * 0.4 }); });
+      d.choices.forEach((c, i) => { const cy = y + 8 + fullWrapped.length * 9 + 4 + i * 10; PH.touch.region(x + 2, cy - 3, w - 4, 12, () => { d.cursor = i; PH.input.tap('KeyE'); }); if (i === d.cursor) { ctx.fillStyle = '#d8c9a6'; ctx.fillRect(x + 6, cy + 2, 3, 3); } F.draw(ctx, c.t, x + 14, cy, { color: i === d.cursor ? '#fff8e0' : '#a89880', glitch: gl * 0.4 }); });
     } else if (d.chars >= line.length) { F.drawRight(ctx, last ? '[E] close' : '[E] ...', x + w - 6, y + h - 9, { color: '#6a6058' }); }
   };
-  UI.prototype.drawMenu = function (ctx, opts, cursor, title) {
+  UI.prototype.drawMenu = function (ctx, opts, cursor, title, onPick) {
     const w = 200, h = opts.length * 10 + 22, x = PH.W / 2 - w / 2, y = PH.H / 2 - h / 2;
     ctx.fillStyle = 'rgba(8,6,12,0.92)'; ctx.fillRect(x, y, w, h); ctx.fillStyle = '#4a4139'; ctx.fillRect(x, y, w, 1); ctx.fillRect(x, y + h - 1, w, 1);
     F.draw(ctx, title, x + 8, y + 5, { color: '#d8c9a6' });
-    opts.forEach((o, i) => { const cy = y + 16 + i * 10; if (i === cursor) { ctx.fillStyle = '#d8c9a6'; ctx.fillRect(x + 8, cy + 2, 3, 3); } F.draw(ctx, o, x + 16, cy, { color: i === cursor ? '#fff8e0' : '#a89880' }); });
+    opts.forEach((o, i) => { const cy = y + 16 + i * 10; if (onPick) PH.touch.region(x + 4, cy - 3, w - 8, 12, () => { onPick(i); PH.input.tap('KeyE'); }); if (i === cursor) { ctx.fillStyle = '#d8c9a6'; ctx.fillRect(x + 8, cy + 2, 3, 3); } F.draw(ctx, o, x + 16, cy, { color: i === cursor ? '#fff8e0' : '#a89880' }); });
   };
   UI.prototype.drawPhone = function (ctx, game, tier) {
     const ph = game.phone; const w = 150, h = 230, x = PH.W / 2 - w / 2, y = PH.H / 2 - h / 2;
@@ -198,6 +218,7 @@
       const list = ph.visible();
       list.forEach((c, i) => {
         const cy = y + 30 + i * 20; const sel = i === this.cursor;
+        PH.touch.region(x + 2, cy - 2, w - 4, 19, () => { this.cursor = i; PH.input.tap('KeyE'); });
         if (sel) { ctx.fillStyle = '#1a2a34'; ctx.fillRect(x + 2, cy - 2, w - 4, 19); }
         ctx.fillStyle = c.def.color; ctx.fillRect(x + 6, cy, 12, 12); F.draw(ctx, c.def.name[0], x + 9, cy + 2, { color: '#111' });
         F.draw(ctx, c.def.name + (c.def.dead ? '  (no service)' : ''), x + 22, cy, { color: c.def.dead ? '#707880' : '#e8e0d0', glitch: gl });
@@ -205,11 +226,12 @@
         F.draw(ctx, lastMsg.length > 19 ? lastMsg.slice(0, 18) + '…' : lastMsg, x + 22, cy + 8, { color: '#6a7a80', glitch: gl });
         if (c.unread) { ctx.fillStyle = '#e04040'; ctx.fillRect(x + w - 14, cy + 2, 8, 8); F.draw(ctx, String(c.unread), x + w - 13, cy + 3, { color: '#fff' }); }
       });
-      const ny = y + 30 + list.length * 20; if (this.cursor === list.length) { ctx.fillStyle = '#1a2a34'; ctx.fillRect(x + 2, ny - 2, w - 4, 12); }
+      const ny = y + 30 + list.length * 20; PH.touch.region(x + 2, ny - 3, w - 4, 14, () => { this.cursor = list.length; PH.input.tap('KeyE'); }); if (this.cursor === list.length) { ctx.fillStyle = '#1a2a34'; ctx.fillRect(x + 2, ny - 2, w - 4, 12); }
       F.draw(ctx, 'Notes (' + game.story.fragments.length + ')', x + 22, ny, { color: '#d8c080' });
-      F.drawCentered(ctx, 'Tab: close', x + w / 2, y + h - 10, { color: '#4a5a60' });
+      PH.touch.region(x, y + h - 15, w, 15, () => PH.input.tap('Tab'));
+      F.drawCentered(ctx, PH.touch.enabled ? 'close' : 'Tab: close', x + w / 2, y + h - 10, { color: '#4a5a60' });
     } else if (this.phoneTab === 'chat') {
-      const c = ph.selected; F.draw(ctx, '< ' + c.def.name, x + 6, y + 17, { color: '#e8e0d0' }); F.drawRight(ctx, c.def.role, x + w - 4, y + 17, { color: '#6a7a80' });
+      const c = ph.selected; PH.touch.region(x, y + 13, 72, 14, () => PH.input.tap('Escape')); F.draw(ctx, '< ' + c.def.name, x + 6, y + 17, { color: '#e8e0d0' }); F.drawRight(ctx, c.def.role, x + w - 4, y + 17, { color: '#6a7a80' });
       // messages, bottom-up
       const choicesH = c.pending ? c.pending.choices.length * 10 + 12 : 12;
       let by = y + h - choicesH - 6; const end = c.msgs.length - this.phoneScroll;
@@ -224,14 +246,18 @@
       }
       ctx.fillStyle = '#1e2a30'; ctx.fillRect(x, y + h - choicesH - 2, w, 1);
       if (c.pending) {
-        c.pending.choices.forEach((ch, i) => { const cy = y + h - choicesH + 2 + i * 10; const sel = i === this.cursor; if (sel) { ctx.fillStyle = '#8fb0b8'; ctx.fillRect(x + 4, cy + 2, 3, 3); } const t = ch.t.length > 22 ? ch.t.slice(0, 21) + '…' : ch.t; F.draw(ctx, t, x + 10, cy, { color: sel ? '#fff' : '#8fa0a8', glitch: gl }); });
-        const cy = y + h - 10; const sel = this.cursor === c.pending.choices.length; if (sel) { ctx.fillStyle = '#8fb0b8'; ctx.fillRect(x + 4, cy + 2, 3, 3); } F.draw(ctx, "Don't reply", x + 10, cy, { color: sel ? '#c09090' : '#6a5a60' });
+        c.pending.choices.forEach((ch, i) => { const cy = y + h - choicesH + 2 + i * 10; const sel = i === this.cursor; PH.touch.region(x + 2, cy - 2, w - 4, 11, () => { this.cursor = i; PH.input.tap('KeyE'); }); if (sel) { ctx.fillStyle = '#8fb0b8'; ctx.fillRect(x + 4, cy + 2, 3, 3); } const t = ch.t.length > 22 ? ch.t.slice(0, 21) + '…' : ch.t; F.draw(ctx, t, x + 10, cy, { color: sel ? '#fff' : '#8fa0a8', glitch: gl }); });
+        const cy = y + h - 10; const sel = this.cursor === c.pending.choices.length; PH.touch.region(x + 2, cy - 2, w - 4, 11, () => { this.cursor = c.pending.choices.length; PH.input.tap('KeyE'); }); if (sel) { ctx.fillStyle = '#8fb0b8'; ctx.fillRect(x + 4, cy + 2, 3, 3); } F.draw(ctx, "Don't reply", x + 10, cy, { color: sel ? '#c09090' : '#6a5a60' });
       } else F.drawCentered(ctx, c.def.dead ? '[E] send anyway' : 'no new messages', x + w / 2, y + h - 10, { color: '#4a5a60' });
     } else if (this.phoneTab === 'notes') { this.drawJournal(ctx, game, x, y + 14, w, h - 14, true); }
   };
   UI.prototype.drawJournal = function (ctx, game, x, y, w, h, inPhone) {
     if (!inPhone) { ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(0, 0, PH.W, PH.H); ctx.fillStyle = '#1a1712'; ctx.fillRect(x, y, w, h); ctx.fillStyle = '#4a4139'; ctx.fillRect(x, y, w, 1); ctx.fillRect(x, y + h - 1, w, 1); }
     const fr = game.story.fragments; const maxc = Math.floor((w - 16) / 6);
+    PH.touch.region(x, y + h - 16, w * 0.38, 16, () => PH.input.tap('ArrowLeft'));
+    PH.touch.region(x + w * 0.62, y + h - 16, w * 0.38, 16, () => PH.input.tap('ArrowRight'));
+    PH.touch.region(x + w * 0.38, y + h - 16, w * 0.24, 16, () => PH.input.tap(inPhone ? 'Escape' : 'KeyJ'));
+    if (inPhone) PH.touch.region(x, y, 72, 12, () => PH.input.tap('Escape'));
     F.draw(ctx, inPhone ? '< Notes' : 'JOURNAL', x + 8, y + 5, { color: '#d8c080' });
     const page = this.journalPage; const total = fr.length + 1;
     F.drawRight(ctx, (page + 1) + '/' + total, x + w - 8, y + 5, { color: '#6a6058' });
@@ -246,12 +272,31 @@
       const f = fr[page]; F.draw(ctx, PH.wrapText(f.title, maxc)[0], x + 8, yy, { color: '#e8e0d0' }); yy += 10; F.draw(ctx, 'day ' + f.day, x + 8, yy, { color: '#6a6058' }); yy += 10;
       const lines = PH.wrapText(f.text.replace(/\n/g, ' '), maxc); for (const l of lines) { if (yy > y + h - 12) break; F.draw(ctx, l, x + 8, yy, { color: '#a89880', glitch: game.sanity.tier() >= 3 ? 0.03 : 0 }); yy += 8; }
     }
-    F.drawCentered(ctx, inPhone ? 'up/down: pages' : 'arrows: pages  J: close', x + w / 2, y + h - 9, { color: '#4a5a60' });
+    F.drawCentered(ctx, PH.touch.enabled ? '\u2039  back  \u203a' : (inPhone ? 'up/down: pages' : 'arrows: pages  J: close'), x + w / 2, y + h - 9, { color: '#4a5a60' });
   };
   UI.prototype.drawHelp = function (ctx) {
     ctx.fillStyle = 'rgba(0,0,0,0.85)'; ctx.fillRect(0, 0, PH.W, PH.H);
+    PH.touch.regionAll(() => PH.input.tap('KeyH'));
+    if (PH.touch.enabled) { this.drawTouchHelp(ctx); return; }
     const L = ['HOLLOW DOME', '', 'Move: A/D or arrows     Hop: Space', 'Interact: E             Use item: F', 'Hotbar: 1-9, Q/R, wheel Phone: Tab', 'Journal: J              Breathe: hold Shift', 'Mute: M                 Pause: Esc', '', 'Feed, water and clean for the birds every day.', 'Then look after yourself. Answer the phone.', 'If something is hard to look at, look away.', 'You do not have to do this alone.', '', 'H to close'];
     L.forEach((l, i) => F.drawCentered(ctx, l, PH.W / 2, 40 + i * 12, { color: i === 0 ? '#d8c9a6' : '#a89880', scale: i === 0 ? 2 : 1 }));
+  };
+  UI.prototype.drawTouchHelp = function (ctx) {
+    const L = ['HOLLOW DOME', '',
+      'Arrows move him. Arrows also move the cursor in menus.',
+      'E interacts and advances text. F uses the held item.',
+      'The arrow-over-a-line button hops.',
+      'Tap an item in the bar to hold it. Tap birds, bowls,',
+      'doors and messages directly.',
+      '',
+      'The phone button opens his messages. The circle button',
+      'is slow breathing: leave it on to steady him.',
+      '',
+      'Feed, water and clean for the birds every day.',
+      'Then look after him. Answer people.',
+      'If something is hard to look at, look away.',
+      '', 'tap to close'];
+    L.forEach((l, i) => F.drawCentered(ctx, l, PH.W / 2, 20 + i * 12, { color: i === 0 ? '#d8c9a6' : i === L.length - 1 ? '#4a5a60' : '#a89880', scale: i === 0 ? 2 : 1 }));
   };
   PH.UI = UI;
 })(window.PH);
