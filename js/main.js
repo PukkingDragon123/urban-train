@@ -220,13 +220,15 @@
     window.addEventListener('resize', resize); resize();
     PH.input.init(canvas); PH.render.init(); build();
     const bootEl = document.getElementById('boot');
-    const go = () => { bootEl.style.display = 'none'; PH.audio.init(); PH.audio.resume(); canvas.focus(); };
-    bootEl.addEventListener('click', go); window.addEventListener('keydown', function once(e) { if (bootEl.style.display !== 'none') { go(); } window.removeEventListener('keydown', once); });
+    const go = () => { if (bootEl) bootEl.style.display = 'none'; PH.audio.init(); PH.audio.resume(); canvas.focus(); };
+    PH.armAudio = go;
+    if (bootEl) bootEl.addEventListener('click', go);
+    window.addEventListener('keydown', function once() { go(); window.removeEventListener('keydown', once); });
     canvas.addEventListener('click', () => { PH.audio.resume(); canvas.focus(); });
     let last = performance.now();
     function loop(now) { let dt = (now - last) / 1000; last = now; if (dt > 0.1) dt = 0.1; try { update(dt); PH.render.frame(sctx, game); } catch (e) { console.error(e); } PH.input.endFrame(); requestAnimationFrame(loop); }
     requestAnimationFrame(loop);
   }
   PH.step = update; PH.save = save;
-  window.addEventListener('DOMContentLoaded', boot);
+  if (document.readyState === 'loading') window.addEventListener('DOMContentLoaded', boot); else boot();
 })(window.PH);

@@ -17,6 +17,16 @@ python3 -m http.server 8000
 
 Keyboard required. Headphones recommended.
 
+### Single-file build
+
+`dist/hollow-dome.html` is the whole game inlined into one page with standalone
+chrome around it, suitable for hosting anywhere or opening straight off disk.
+Rebuild it after changing anything in `js/`:
+
+```
+python3 tools/build-single-file.py
+```
+
 ## Controls
 
 | Action | Keys |
